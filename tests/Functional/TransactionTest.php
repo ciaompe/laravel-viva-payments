@@ -7,6 +7,7 @@ use Sebdesign\VivaPayments\Card;
 use Sebdesign\VivaPayments\Order;
 use Sebdesign\VivaPayments\Test\TestCase;
 use Sebdesign\VivaPayments\Transaction;
+use Sebdesign\VivaPayments\VivaException;
 
 class TransactionTest extends TestCase
 {
@@ -17,16 +18,16 @@ class TransactionTest extends TestCase
     public function createTransaction()
     {
         $orderCode = $this->getOrderCode();
-        $token = $this->getToken();
+        $chargeToken = $this->getChargeToken();
         $installments = $this->getInstallments();
 
         $original = app(Transaction::class)->create([
             'OrderCode'       => $orderCode,
             'SourceCode'      => env('VIVA_SOURCE_CODE'),
             'Installments'    => $installments,
-            'AllowsRecurring' => true,
+            'AllowRecurring' => true,
             'CreditCard'      => [
-                'Token'       => $token,
+                'Token'       => $chargeToken,
             ],
         ]);
 
@@ -43,15 +44,16 @@ class TransactionTest extends TestCase
      */
     public function createRecurringTransaction($original)
     {
-        $this->markTestSkipped('Error 400: Negative or zero amount');
-
         $installments = $this->getInstallments();
 
-        $recurring = app(Transaction::class)->createRecurring($original->TransactionId, [
-            'Amount'        => 1500,
-            'SourceCode'    => env('VIVA_SOURCE_CODE'),
-            'Installments'  => $installments,
-        ]);
+        try {
+            $recurring = app(Transaction::class)->createRecurring($original->TransactionId, 1500, [
+                'SourceCode'    => env('VIVA_SOURCE_CODE'),
+                'Installments'  => $installments,
+            ]);
+        } catch (VivaException $e) {
+            $this->markTestSkipped($e->getMessage());
+        }
 
         $this->assertEquals(Transaction::COMPLETED, $recurring->StatusId, 'The transaction was not completed.');
         $this->assertEquals(15, $recurring->Amount);
@@ -117,7 +119,7 @@ class TransactionTest extends TestCase
      */
     public function getByClearanceDate($original)
     {
-        $this->markTestSkipped('Clearance date is null.');
+        // $this->markTestSkipped('Clearance date is null.');
 
         $date = Carbon::parse($original->InsDate);
 
@@ -161,11 +163,11 @@ class TransactionTest extends TestCase
         ]);
     }
 
-    protected function getToken()
+    protected function getChargeToken()
     {
         $expirationDate = Carbon::parse('next year');
 
-        return app(Card::class)->token('Customer name', '4111 1111 1111 1111', 111, $expirationDate->month, $expirationDate->year);
+        return app(Card::class)->chargeToken('Customer name', '4111 1111 1111 1111', 111, $expirationDate->month, $expirationDate->year);
     }
 
     protected function getInstallments()

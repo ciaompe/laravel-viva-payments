@@ -54,8 +54,8 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
-        $app->useEnvironmentPath(__DIR__.'/..');
-        $app->make('Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables')->bootstrap($app);
+        // $app->useEnvironmentPath(__DIR__.'/..');
+        // $app->make('Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables')->bootstrap($app);
     }
 
     protected function mockRequests()
@@ -93,10 +93,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             'handler' => $this->handler,
             'base_uri' => Client::DEMO_URL,
             'curl' => [CURLOPT_SSL_CIPHER_LIST => 'TLSv1'],
-            'auth' => [
-                $this->app['config']['merchant_id'],
-                $this->app['config']['api_key'],
-            ],
         ]);
 
         $this->client = new Client($mockClient);
@@ -109,6 +105,24 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         }, $bodies);
 
         $this->mockResponses($responses);
+    }
+
+    public function assertBasicAuthentication(RequestInterface $request)
+    {
+        $this->assertTrue($request->hasHeader('Authorization'), "The authorization should be passed as a header.");
+
+        $authorization = $request->getHeader('Authorization')[0];
+
+        $this->assertStringStartsWith('Basic', $authorization);
+
+        $basic = base64_decode(substr($authorization, 6));
+
+        [$username, $password] = explode(':', $basic);
+
+        $this->assertEquals($this->app['config']->get('services.viva.merchant_id'), $username);
+        $this->assertEquals($this->app['config']->get('services.viva.api_key'), $password);
+
+        return $this;
     }
 
     public function assertPath(string $path, RequestInterface $request)

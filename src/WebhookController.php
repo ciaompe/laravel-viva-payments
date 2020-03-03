@@ -2,6 +2,7 @@
 
 namespace Sebdesign\VivaPayments;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
@@ -75,11 +76,9 @@ abstract class WebhookController extends Controller
 
     /**
      * Verify a webhook.
-     *
-     * @return array
      */
-    protected function verify() : array
+    protected function verify() : JsonResponse
     {
-        return (array) $this->webhook->getAuthorizationCode();
+        return new JsonResponse($this->webhook->getAuthorizationCode());
     }
 }

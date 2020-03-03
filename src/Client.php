@@ -24,6 +24,16 @@ class Client
     protected $client;
 
     /**
+     * @var string
+     */
+    protected $accessToken;
+
+    /**
+     * @var array
+     */
+    protected $defaultOptions = [];
+
+    /**
      * Constructor.
      *
      * @param  \GuzzleHttp\Client   $client
@@ -43,7 +53,7 @@ class Client
      */
     public function get(string $url, array $options = [])
     {
-        $response = $this->client->get($url, $options);
+        $response = $this->client->get($url, array_merge_recursive($this->defaultOptions, $options));
 
         return $this->getBody($response);
     }
@@ -57,7 +67,7 @@ class Client
      */
     public function post(string $url, array $options = [])
     {
-        $response = $this->client->post($url, $options);
+        $response = $this->client->post($url, array_merge_recursive($this->defaultOptions, $options));
 
         return $this->getBody($response);
     }
@@ -71,7 +81,7 @@ class Client
      */
     public function patch(string $url, array $options = [])
     {
-        $response = $this->client->patch($url, $options);
+        $response = $this->client->patch($url, array_merge_recursive($this->defaultOptions, $options));
 
         return $this->getBody($response);
     }
@@ -85,9 +95,56 @@ class Client
      */
     public function delete(string $url, array $options = [])
     {
-        $response = $this->client->delete($url, $options);
+        $response = $this->client->delete($url, array_merge_recursive($this->defaultOptions, $options));
 
         return $this->getBody($response);
+    }
+
+    public function useBasicAuthentication() : void
+    {
+        $this->defaultOptions = [
+            \GuzzleHttp\RequestOptions::AUTH => [
+                config('services.viva.merchant_id'),
+                config('services.viva.api_key'),
+            ],
+        ];
+    }
+
+    public function useOAuth2Authentication() : void
+    {
+        $accessToken = $this->getAccessToken();
+
+        $this->defaultOptions = [
+            \GuzzleHttp\RequestOptions::HEADERS => [
+                'Authorization' => sprintf("Bearer %s", $accessToken),
+            ],
+        ];
+    }
+
+    public function useClientCredentials() : void
+    {
+        $this->defaultOptions = [
+            \GuzzleHttp\RequestOptions::AUTH => [
+                config('services.viva.client_id'),
+                config('services.viva.client_secret'),
+            ],
+        ];
+    }
+
+    public function getAccessToken() : string
+    {
+        if (is_null($this->accessToken)) {
+            $this->accessToken = (new OAuth($this))->getAccessToken()->access_token;
+        }
+
+        return $this->accessToken;
+    }
+
+    public function setAccessToken(string $accessToken) : self
+    {
+        $this->accessToken = $accessToken;
+
+        return $this;
     }
 
     /**

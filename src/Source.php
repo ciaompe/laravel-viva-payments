@@ -38,6 +38,8 @@ class Source
     {
         $uri = new Uri($url);
 
+        $this->client->useBasicAuthentication();
+
         return $this->client->post(self::ENDPOINT, [
             \GuzzleHttp\RequestOptions::FORM_PARAMS => [
                 'Name'          => $name,

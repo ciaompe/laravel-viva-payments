@@ -8,13 +8,6 @@ use Illuminate\Support\ServiceProvider;
 class VivaPaymentsServiceProvider extends ServiceProvider
 {
     /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = true;
-
-    /**
      * Register the application services.
      *
      * @return void
@@ -46,10 +39,7 @@ class VivaPaymentsServiceProvider extends ServiceProvider
             'curl' => $this->curlDoesntUseNss()
                 ? [CURLOPT_SSL_CIPHER_LIST => 'TLSv1']
                 : [],
-            \GuzzleHttp\RequestOptions::AUTH => [
-                $config['merchant_id'],
-                $config['api_key'],
-            ],
+            // 'debug' => true,
         ]);
     }
 
@@ -92,5 +82,15 @@ class VivaPaymentsServiceProvider extends ServiceProvider
     public function provides()
     {
         return [Client::class];
+    }
+
+    /**
+     * Determine if the provider is deferred.
+     *
+     * @return bool
+     */
+    public function isDeferred()
+    {
+        return true;
     }
 }

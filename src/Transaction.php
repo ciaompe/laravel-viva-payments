@@ -112,6 +112,8 @@ class Transaction
      */
     public function create(array $parameters)
     {
+        $this->client->useBasicAuthentication();
+
         return $this->client->post(self::ENDPOINT, [
             \GuzzleHttp\RequestOptions::FORM_PARAMS => $parameters,
             \GuzzleHttp\RequestOptions::QUERY => [
@@ -130,8 +132,12 @@ class Transaction
      */
     public function createRecurring(string $id, int $amount, array $parameters = [])
     {
+        $parameters = array_merge(['Amount' => $amount], $parameters);
+
+        $this->client->useBasicAuthentication();
+
         return $this->client->post(self::ENDPOINT.$id, [
-            \GuzzleHttp\RequestOptions::FORM_PARAMS => array_merge(['Amount' => $amount], $parameters),
+            \GuzzleHttp\RequestOptions::FORM_PARAMS => $parameters,
         ]);
     }
 
@@ -143,6 +149,8 @@ class Transaction
      */
     public function get(string $id) : array
     {
+        $this->client->useBasicAuthentication();
+
         $response = $this->client->get(self::ENDPOINT.$id);
 
         return $response->Transactions;
@@ -156,6 +164,8 @@ class Transaction
      */
     public function getByOrder($ordercode) : array
     {
+        $this->client->useBasicAuthentication();
+
         $response = $this->client->get(self::ENDPOINT, [
             \GuzzleHttp\RequestOptions::QUERY => compact('ordercode'),
         ]);
@@ -173,6 +183,8 @@ class Transaction
     {
         $date = $this->formatDate($date);
 
+        $this->client->useBasicAuthentication();
+
         $response = $this->client->get(self::ENDPOINT, [
             \GuzzleHttp\RequestOptions::QUERY => compact('date'),
         ]);
@@ -189,6 +201,8 @@ class Transaction
     public function getByClearanceDate($clearancedate) : array
     {
         $clearancedate = $this->formatDate($clearancedate);
+
+        $this->client->useBasicAuthentication();
 
         $response = $this->client->get(self::ENDPOINT, [
             \GuzzleHttp\RequestOptions::QUERY => compact('clearancedate'),
@@ -224,6 +238,8 @@ class Transaction
     {
         $query = ['Amount' => $amount];
         $actionUser = $actionUser ? ['ActionUser' => $actionUser] : [];
+
+        $this->client->useBasicAuthentication();
 
         return $this->client->delete(self::ENDPOINT.$id, [
             \GuzzleHttp\RequestOptions::QUERY => array_merge($query, $actionUser),

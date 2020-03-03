@@ -28,12 +28,15 @@
     </logging>
     <php>
         <env name="APP_ENV" value="testing"/>
-        <env name="VIVA_API_KEY" value=""/>
-        <env name="VIVA_MERCHANT_ID" value=""/>
-        <env name="VIVA_PUBLIC_KEY" value=""/>
-        <env name="VIVA_CLIENT_ID" value=""/>
-        <env name="VIVA_CLIENT_SECRET" value=""/>
+        <env name="VIVA_API_KEY" value="-HiE&amp;i"/>
+        <env name="VIVA_MERCHANT_ID" value="0998e4de-3574-451b-9521-8e4f2a06c39d"/>
+        <env name="VIVA_PUBLIC_KEY" value="UKOea0ocsYs1ZDClP9wq5iRNHVSm/nNNK6eX/t6P2sk="/>
+        <env name="VIVA_CLIENT_ID" value="0998e4de-3574-451b-9521-8e4f2a06c39d.apps.vivapayments.com"/>
+        <env name="VIVA_CLIENT_SECRET" value="0998e4de-3574-451b-9521-8e4f2a06c39d"/>
+        <!-- <env name="VIVA_CLIENT_ID" value="generic_acquiring_client.apps.vivapayments.com"/>
+        <env name="VIVA_CLIENT_SECRET" value="generic_acquiring_client"/> -->
         <env name="VIVA_ENVIRONMENT" value="demo"/>
-        <env name="VIVA_SOURCE_CODE" value=""/>
+        <!-- <env name="VIVA_SOURCE_CODE" value="4693"/> -->
+        <env name="VIVA_SOURCE_CODE" value="9253"/>
     </php>
 </phpunit>
