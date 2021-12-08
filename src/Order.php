@@ -56,6 +56,39 @@ class Order
     }
 
     /**
+     * Create an ISV payment order.
+     *
+     * @see https://developer.vivawallet.com/isv-partner-program/payment-isv-api/#tag/Payments/paths/~1checkout~1v2~1isv~1orders/post
+     *
+     * @param  int  $amount  The requested amount in the currency's smallest unit of measurement.
+     * @param  array  $parameters  Optional parameters
+     * @param  array  $guzzleOptions  Additional parameters for the Guzzle client
+     * @param  string merchantId string <uuid> The id of the merchant that the order belongs to. In other words, this is the id of the merchant on whose behalf the payment order is created, and who will be paid by the customer.
+     * @return int
+     */
+
+    public function createIsv(
+        int $amount,
+        array $parameters = [],
+        string $merchantId,
+        array $guzzleOptions = []
+    ) {
+        $parameters = array_merge_recursive(['amount' => $amount], $parameters);
+
+        $response = $this->client->post(
+            $this->client->getApiUrl()->withPath('/checkout/v2/isv/orders').'?merchantId='.$merchantId,
+            array_merge_recursive(
+                [RequestOptions::JSON => $parameters],
+                $this->client->authenticateWithBearerToken(),
+                $guzzleOptions
+            )
+        );
+
+        return $response->orderCode;
+
+    }
+
+    /**
      * Retrieve information about an order.
      *
      * @see https://developer.vivawallet.com/api-reference-guide/payment-api/#tag/Payments/paths/~1api~1orders/post
@@ -70,6 +103,27 @@ class Order
             $this->client->getUrl()->withPath("/api/orders/{$orderCode}"),
             array_merge_recursive(
                 $this->client->authenticateWithBasicAuth(),
+                $guzzleOptions
+            )
+        );
+    }
+
+    /**
+     * Retrieve information about an ISV order.
+     *
+     * @see https://developer.vivawallet.com/isv-partner-program/payment-isv-api/#tag/Transactions/paths/~1checkout~1v2~1isv~1transactions~1{transactionId}/get
+     *
+     * @param  string   $transaction_id The unique ID of the initial transaction.
+     * @param  string   $merchantId The id of the merchant that the transaction belongs to.
+     * @param  array    $guzzleOptions  Additional parameters for the Guzzle client
+     * @return \stdClass
+     */
+    public function getISV($transaction_id, $merchantId, array $guzzleOptions = []) {
+
+        return $this->client->get(
+            $this->client->getApiUrl()->withPath('/checkout/v2/isv/transactions/'.$transaction_id).'?merchantId='.$merchantId,
+            array_merge_recursive(
+                $this->client->authenticateWithBearerToken(),
                 $guzzleOptions
             )
         );
